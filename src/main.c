@@ -1,11 +1,15 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
+#include <string.h>
+
 GdkPixbuf *imidz_pojntr;
 GtkWidget *window;
 GtkWidget *box;
 GtkWidget *imidztukonvert;
 GtkWidget *slider;
 
+
+FILE *scriptfile;
 
 
 void displayimage() {
@@ -72,14 +76,37 @@ void save(GtkButton *button4, gpointer user_data) {
     }
 }
 
-/*void export(GtkButton *button5, gpointer user_data) {
+void export(GtkButton *button5, gpointer user_data) {
+    if (!imidztukonvert) return;
     GdkPixbuf *pixbuf = gtk_image_get_pixbuf(GTK_IMAGE(imidztukonvert));
+    if (!pixbuf) return;
     int width = gdk_pixbuf_get_width(pixbuf);
-    int 
+    int height = gdk_pixbuf_get_height(pixbuf);
+    int n_channels = gdk_pixbuf_get_n_channels(pixbuf);
+    int rowstride = gdk_pixbuf_get_rowstride(pixbuf);
 
-
+    if (width == height) {
+        guchar *p = gdk_pixbuf_get_pixels(pixbuf);
+        char line[32];
+        scriptfile = fopen("script.txt", "a");
+        if (scriptfile == NULL) {
+            g_print("Error: Could not open script.txt for writing.\n");
+            return;
+        }
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                guchar *pixel = p + y * rowstride + x * n_channels;
+                if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
+                    fprintf(scriptfile, "x %d y %d\n", x, y);
+               
+                }
+            }
+        
+        }
+        fclose(scriptfile);
+    }
 }
-*/
+
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
     GtkWidget *button1;
@@ -102,6 +129,7 @@ int main(int argc, char *argv[]) {
     g_signal_connect(button2, "clicked", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(button3, "clicked", G_CALLBACK(selectfile), NULL);
     g_signal_connect(button4, "clicked", G_CALLBACK(save), NULL);
+    g_signal_connect(button5, "clicked", G_CALLBACK(export), NULL);
 
 
     gtk_window_set_title(GTK_WINDOW(window), "Konverter obrazku do souradnic pro robota");
@@ -114,6 +142,7 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(box), button2, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button3, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button4, TRUE, TRUE, 50);
+    gtk_box_pack_start(GTK_BOX(box), button5, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), slider, TRUE, TRUE, 50);
 
     
