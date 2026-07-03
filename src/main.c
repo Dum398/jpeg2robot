@@ -1,13 +1,15 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 GdkPixbuf *imidz_pojntr;
 GtkWidget *window;
-GtkWidget *box;
 GtkWidget *imidztukonvert;
 GtkWidget *slider;
-
+GError *err = NULL;
+GtkWidget *box1;
+int compression;
 
 FILE *scriptfile;
 
@@ -19,7 +21,7 @@ void displayimage() {
             imidztukonvert = NULL;
         }
         imidztukonvert = gtk_image_new_from_pixbuf(imidz_pojntr);
-        gtk_box_pack_start(GTK_BOX(box), imidztukonvert, TRUE, TRUE, 50);
+        gtk_box_pack_start(GTK_BOX(box1), imidztukonvert, TRUE, TRUE, 50);
         gtk_widget_show_all(window);
 
     }
@@ -31,7 +33,7 @@ void selectfile(GtkButton *button3, gpointer user_data) {
     GtkWidget *dialog = gtk_file_chooser_dialog_new("Open Image", GTK_WINDOW(user_data), GTK_FILE_CHOOSER_ACTION_OPEN, "_Cancel", GTK_RESPONSE_CANCEL, "_Open", GTK_RESPONSE_ACCEPT, NULL);
     if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
         char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        GError *err = NULL;
+
         imidz_pojntr = gdk_pixbuf_new_from_file(filename, &err);
             if (imidz_pojntr) {
                 g_print("Nacteno");
@@ -63,7 +65,7 @@ void convert(GtkButton *button1, gpointer user_data) {
             p[i] = (p[i] > val) ? 255 : 0;
         }
         imidztukonvert = gtk_image_new_from_pixbuf(saturated);
-        gtk_box_pack_start(GTK_BOX(box), imidztukonvert, TRUE, TRUE, 50);
+        gtk_box_pack_start(GTK_BOX(box1), imidztukonvert, TRUE, TRUE, 50);
         gtk_widget_show_all(window);
     }
 }
@@ -97,15 +99,14 @@ void export(GtkButton *button5, gpointer user_data) {
             for (int x = 0; x < width; x++) {
                 guchar *pixel = p + y * rowstride + x * n_channels;
                 if (pixel[0] == 0 && pixel[1] == 0 && pixel[2] == 0) {
-                    fprintf(scriptfile, "x %d y %d\n", x, y);
-               
+                        fprintf(scriptfile, "x %d y %d\n", x, y);
                 }
             }
-        
-        }
-        fclose(scriptfile);
+        }       
     }
+    fclose(scriptfile);
 }
+
 
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
@@ -114,6 +115,7 @@ int main(int argc, char *argv[]) {
     GtkWidget *button3;
     GtkWidget *button4;
     GtkWidget *button5;
+    GtkWidget *box;
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     button1 = gtk_button_new_with_label("Convert!");
@@ -123,7 +125,8 @@ int main(int argc, char *argv[]) {
     button5 = gtk_button_new_with_label("Export file for NXT");
     slider = gtk_scale_new_with_range(GTK_ORIENTATION_HORIZONTAL, 0, 255, 1);
     box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-
+    box1 = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    imidztukonvert = gtk_image_new_from_pixbuf(gdk_pixbuf_new_from_file("./img/placeholder.png", &err));
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     g_signal_connect(button1, "clicked", G_CALLBACK(convert), NULL);
     g_signal_connect(button2, "clicked", G_CALLBACK(gtk_main_quit), NULL);
@@ -136,14 +139,17 @@ int main(int argc, char *argv[]) {
     gtk_window_set_default_size(GTK_WINDOW(window), 700, 600);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
 
-    gtk_container_add(GTK_CONTAINER(window), box);
-
+    gtk_container_add(GTK_CONTAINER(window), box1);
+    gtk_box_pack_start(GTK_BOX(box1), box, TRUE, TRUE, 50);
+    gtk_box_pack_start(GTK_BOX(box1), imidztukonvert, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button1, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button2, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button3, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button4, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), button5, TRUE, TRUE, 50);
     gtk_box_pack_start(GTK_BOX(box), slider, TRUE, TRUE, 50);
+
+
 
     
     gtk_widget_show_all(window);
