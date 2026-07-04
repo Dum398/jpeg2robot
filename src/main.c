@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+
 
 GdkPixbuf *imidz_pojntr;
 GtkWidget *window;
@@ -104,6 +104,7 @@ void export(GtkButton *button5, gpointer user_data) {
             }
         }       
     }
+    fprintf(scriptfile, "EOF");
     fclose(scriptfile);
 }
 
