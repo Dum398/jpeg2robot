@@ -1,6 +1,5 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
-#include <string.h>
 
 
 GdkPixbuf *imidz_pojntr;
@@ -134,8 +133,8 @@ int main(int argc, char *argv[]) {
     g_signal_connect(button3, "clicked", G_CALLBACK(selectfile), NULL);
     g_signal_connect(button4, "clicked", G_CALLBACK(save), NULL);
     g_signal_connect(button5, "clicked", G_CALLBACK(export), NULL);
-
-
+    GdkRGBA black = {0.0, 0.0, 0.0, 1.0};
+    gtk_widget_override_background_color(window, GTK_STATE_FLAG_NORMAL, &black);
     gtk_window_set_title(GTK_WINDOW(window), "Konverter obrazku do souradnic pro robota");
     gtk_window_set_default_size(GTK_WINDOW(window), 700, 600);
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
